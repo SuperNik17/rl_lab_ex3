@@ -61,7 +61,7 @@ bool service_callback( ros_exercise2::transform_srv::Request &req, ros_exercise2
 
 int main(int argc, char **argv) {
 
-	ros::init(argc, argv, "transformation_service");
+	ros::init(argc, argv, "transformation_service_server");
 	ros::NodeHandle n;
 	
 	ros::Rate rate(1.0);
