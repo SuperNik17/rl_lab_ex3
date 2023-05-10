@@ -3,6 +3,8 @@
 //Header of the service message. 
 //	The service message belongs to the ros_service package
 #include "ros_exercise2/transform_srv.h"
+#include <std_msgs/String.h>
+#include <geometry_msgs/Pose.h>
 
 using namespace std;
 
@@ -15,7 +17,7 @@ using namespace std;
 //	Input values:  the request part of the servive 
 //				   the output of the service to fill
 bool service_callback( ros_exercise2::transform_srv::Request &req, ros_exercise2::transform_srv::Response &res) {
-
+	bool working = true;
 
 	cout << "Service transform received: " << endl;
 	//We know that the service is called with 2 parameters: target frame string and chaser frame string
@@ -29,23 +31,18 @@ bool service_callback( ros_exercise2::transform_srv::Request &req, ros_exercise2
     tf::StampedTransform transform;
 
     try{
-        listener.waitForTransform(req.target_frame,req.chaser_frame,ros::Time(0),ros::Duration(3.0));
-		listener.lookupTransform(req.target_frame,req.chaser_frame,ros::Time(0),transform);
-    }catch(tf::TransformException ex)
-	{
-		ROS_ERROR("%s",ex.what());
-        ros::Duration(1.0).sleep();
-	}
-	
-	res.pose.position.x = transform.getOrigin().x();
-	res.pose.position.y = transform.getOrigin().y();
-	res.pose.position.z = transform.getOrigin().z();
-	res.pose.orientation.x = transform.getRotation().x();
-	res.pose.orientation.y = transform.getRotation().y();
-	res.pose.orientation.z = transform.getRotation().z();
-	res.pose.orientation.w = transform.getRotation().w();
+        listener.waitForTransform(req.target_frame.data,req.chaser_frame.data,ros::Time(0),ros::Duration(3.0));
+		listener.lookupTransform(req.target_frame.data,req.chaser_frame.data,ros::Time(0),transform);
+		working = true;
+		res.pose.position.x = transform.getOrigin().x();
+		res.pose.position.y = transform.getOrigin().y();
+		res.pose.position.z = transform.getOrigin().z();
+		res.pose.orientation.x = transform.getRotation().x();
+		res.pose.orientation.y = transform.getRotation().y();
+		res.pose.orientation.z = transform.getRotation().z();
+		res.pose.orientation.w = transform.getRotation().w();
 
-	ROS_INFO_STREAM(" Transform: " << 
+		ROS_INFO_STREAM(" Transform: " << 
         
             res.pose.position.x << ", " << 
             res.pose.position.y << ", " <<
@@ -55,8 +52,14 @@ bool service_callback( ros_exercise2::transform_srv::Request &req, ros_exercise2
             res.pose.orientation.z << ", " <<
 			res.pose.orientation.w
         );
-
-	return true;
+    }catch(tf::TransformException ex)
+	{
+		ROS_ERROR("%s",ex.what());
+        ros::Duration(1.0).sleep();
+		working = false;
+	}
+	
+	return working;
 }
 
 int main(int argc, char **argv) {
@@ -66,16 +69,16 @@ int main(int argc, char **argv) {
 	
 	ros::Rate rate(1.0);
     
-    while (ros::ok()) {
+ 
 	ROS_INFO_STREAM(" Waiting for a service client");
 
 	//Initialize the service object: name of the service and callback function
 	//	Like subscribers, also tje callback function can be declared as a class function
-	ros::ServiceServer service = n.advertiseService("transformation", service_callback);
+	ros::ServiceServer service = n.advertiseService("T", service_callback);
 	rate.sleep(); 
-	}
+	
 
-	// Call the spin to
+	// Call the spin 
 	ros::spin();
 
 	return 0;

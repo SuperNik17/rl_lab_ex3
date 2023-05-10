@@ -157,6 +157,9 @@ include_directories(
 add_executable(service_server_urdf src/service_server_urdf.cpp)
 target_link_libraries(service_server_urdf ${catkin_LIBRARIES})
 
+add_executable(service_client_urdf src/service_client_urdf.cpp)
+target_link_libraries(service_client_urdf ${catkin_LIBRARIES})
+
 #############
 ## Install ##
 #############
